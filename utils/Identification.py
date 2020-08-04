@@ -1,6 +1,9 @@
+import warnings
 import numpy as np
 from utils import OpenCV
 from mtcnn.mtcnn import MTCNN
+
+warnings.simplefilter('ignore')
 
 
 def extractFaces(path, requiredSize=(160, 160)):
