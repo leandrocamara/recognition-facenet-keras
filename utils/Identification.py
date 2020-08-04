@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+from os import listdir
 from utils import OpenCV
 from mtcnn.mtcnn import MTCNN
 
@@ -22,8 +23,18 @@ def extractFaces(path, requiredSize=(160, 160)):
         faces.append(face)
 
         OpenCV.showRectangle(image, x, y)
+    return faces, image
 
-    return image, faces  # np.asarray(image)
+
+def loadInputFaces(directory):
+    X, Y, photos = [], [], []
+    for filename in listdir(directory):
+        path = directory + '/' + filename
+        faces, image = extractFaces(path)
+        X.extend(faces)
+        photos.append(image)
+    Y = ['person_' + str(i + 1) for i in range(len(X))]
+    return X, Y, photos
 
 
 def getFace(pixels, box):
