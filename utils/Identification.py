@@ -34,7 +34,7 @@ def loadInputFaces(directory):
         X.extend(faces)
         photos.append(image)
     Y = ['person_' + str(i + 1) for i in range(len(X))]
-    return X, Y, photos
+    return np.asarray(X), np.asarray(Y), photos
 
 
 def getFace(pixels, box):
