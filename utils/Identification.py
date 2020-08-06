@@ -1,15 +1,13 @@
-import warnings
 import numpy as np
 from os import listdir
 from utils import OpenCV
 from mtcnn.mtcnn import MTCNN
 
-warnings.simplefilter('ignore')
+mtcnn = MTCNN()
 
 
-def extractFaces(path, requiredSize=(160, 160)):
+def extractFaces(path, filename, requiredSize=(160, 160)):
     faces = []
-    mtcnn = MTCNN()
     image = OpenCV.getImage(path)
 
     results = mtcnn.detect_faces(image)
@@ -20,21 +18,23 @@ def extractFaces(path, requiredSize=(160, 160)):
 
         face, x, y = getFace(image, result['box'])
         face = OpenCV.resizeImage(face, requiredSize)
-        faces.append(face)
+        faces.append({'face': face, 'axisX': x, 'axisY': y, 'filename': filename})
 
-        OpenCV.showRectangle(image, x, y)
     return faces, image
 
 
 def loadInputFaces(directory):
-    X, Y, photos = [], [], []
+    allFaces, photos = [], dict()
     for filename in listdir(directory):
         path = directory + '/' + filename
-        faces, image = extractFaces(path)
-        X.extend(faces)
-        photos.append(image)
-    Y = ['person_' + str(i + 1) for i in range(len(X))]
-    return np.asarray(X), np.asarray(Y), photos
+        faces, image = extractFaces(path, filename)
+        allFaces.extend(faces)
+        photos[filename] = image
+
+    for i in range(len(allFaces)):
+        allFaces[i]['name'] = 'person_' + str(i + 1)
+
+    return np.asarray(allFaces), photos
 
 
 def getFace(pixels, box):

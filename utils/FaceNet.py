@@ -2,38 +2,56 @@
 # https://drive.google.com/drive/folders/1pwQ3H4aJ8a6yyJHZkTwtjcL4wYWQb7bn
 
 import numpy as np
-from sklearn.svm import SVC
+from utils import OpenCV
 from keras.models import load_model
-from sklearn.metrics import accuracy_score
+from scipy.spatial.distance import cosine
 from sklearn.preprocessing import Normalizer
-from sklearn.preprocessing import LabelEncoder
 
+recognitionRate = 0.3
 model = load_model('data/model/facenet_keras.h5')
 
 
-def predictFaces(trainX, trainY, testX, testY):
-    trainY, testY = encodeLabels(trainY), encodeLabels(testY)
-    trainX, testX = getFacesEmbedding(trainX), getFacesEmbedding(testX)
+def searchFaces(targets, people, photos):
+    peopleEmbedding = getFacesEmbedding(people)
+    targetsEmbedding = getFacesEmbedding(targets)
 
-    svc = SVC(kernel='linear', probability=True)
-    svc.fit(trainX, trainY)
+    for personEmbedding in peopleEmbedding:
+        name = 'unknown'
+        minDistance = float('inf')
 
-    yhatTrain = svc.predict(trainX)
-    yhatTest = svc.predict(testX)
+        for targetEmbedding in targetsEmbedding:
 
-    scoreTrain = accuracy_score(trainY, yhatTrain)
-    scoreTest = accuracy_score(testY, yhatTest)
+            distancePeopleTarget = cosine(targetEmbedding['face'], personEmbedding['face'])
 
-    print('Accuracy: train=%.3f, test=%.3f' % (scoreTrain * 100, scoreTest * 100))
+            if distancePeopleTarget < recognitionRate and distancePeopleTarget < minDistance:
+                name = targetEmbedding['name']
+                minDistance = distancePeopleTarget
+
+        image, axisX, axisY = photos[personEmbedding['filename']], personEmbedding['axisX'], personEmbedding['axisY']
+
+        if name == 'unknown':
+            OpenCV.showRectangle(image, axisX, axisY, OpenCV.colorFailure)
+            OpenCV.showText(image, name, axisX, OpenCV.colorFailure)
+        else:
+            OpenCV.showRectangle(image, axisX, axisY, OpenCV.colorSuccess)
+            OpenCV.showText(image, name + f" {minDistance:.2f}", axisX, OpenCV.colorSuccess)
+
+    return photos
 
 
-def getFacesEmbedding(faces):
+def getFacesEmbedding(facesDict):
     embeddings = []
-    for face in faces:
-        embedding = getFaceEmbedding(face)
+    for faceDict in facesDict:
+        embedding = getFaceEmbedding(faceDict['face'])
         embeddings.append(embedding)
+
     embeddings = np.asarray(embeddings)
-    return normalizeEmbeddings(embeddings)
+    embeddings = normalizeEmbeddings(embeddings)
+
+    for i in range(len(embeddings)):
+        facesDict[i]['face'] = embeddings[i]
+
+    return facesDict
 
 
 def getFaceEmbedding(face):
@@ -56,7 +74,3 @@ def transformFaceToSample(face):
 def normalizeEmbeddings(embeddings):
     encoder = Normalizer(norm='l2')
     return encoder.transform(embeddings)
-
-
-def encodeLabels(labels):
-    return LabelEncoder().fit_transform(labels)
