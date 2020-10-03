@@ -14,6 +14,9 @@ def extractFaces(path, filename, requiredSize=(160, 160)):
     faces = []
     image = OpenCV.getImage(path)
 
+    axisMax = max(image.shape)
+    image = OpenCV.resizeScaleImage(image, scale=(1000 / axisMax))
+
     results = mtcnn.detect_faces(image)
 
     for result in results:

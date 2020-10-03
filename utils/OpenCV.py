@@ -13,6 +13,10 @@ def resizeImage(image, size):
     return cv2.resize(image, size)
 
 
+def resizeScaleImage(image, scale):
+    return cv2.resize(image, (0, 0), fx=scale, fy=scale)
+
+
 def showRectangle(image, x, y, color=(255, 255, 255)):
     cv2.rectangle(image, x, y, color, 2)
 

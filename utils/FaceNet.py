@@ -29,12 +29,11 @@ def searchFaces(targets, people, photos):
 
         image, axisX, axisY = photos[personEmbedding['filename']], personEmbedding['axisX'], personEmbedding['axisY']
 
-        if name == 'unknown':
-            OpenCV.showRectangle(image, axisX, axisY, OpenCV.colorFailure)
-            OpenCV.showText(image, name, axisX, OpenCV.colorFailure)
-        else:
-            OpenCV.showRectangle(image, axisX, axisY, OpenCV.colorSuccess)
-            OpenCV.showText(image, name + f" {minDistance:.2f}", axisX, OpenCV.colorSuccess)
+        color = OpenCV.colorFailure if name == 'unknown' else OpenCV.colorSuccess
+
+        OpenCV.showText(image, name, axisX, color)
+        OpenCV.showRectangle(image, axisX, axisY, color)
+        # OpenCV.showText(image, name + f" {minDistance:.2f}", axisX, color)
 
     return photos
 
