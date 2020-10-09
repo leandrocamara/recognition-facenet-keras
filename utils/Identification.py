@@ -1,11 +1,10 @@
 import math
-import numpy as np
-from PIL import Image
 from os import listdir
-from utils import OpenCV
+
+import numpy as np
 from mtcnn.mtcnn import MTCNN
 
-import cv2
+from utils import OpenCV
 
 mtcnn = MTCNN()
 
@@ -13,14 +12,15 @@ mtcnn = MTCNN()
 def extractFaces(path, filename, requiredSize=(160, 160)):
     faces = []
     image = OpenCV.getImage(path)
+    scale = 2000  # 1000
 
     axisMax = max(image.shape)
-    image = OpenCV.resizeScaleImage(image, scale=(1000 / axisMax))
+    image = OpenCV.resizeScaleImage(image, scale=(scale / axisMax))
 
     results = mtcnn.detect_faces(image)
 
     for result in results:
-        if result['confidence'] < 0.97:
+        if result['confidence'] < 0.98:
             continue
 
         face, axisX, axisY = getFace(image, result['box'])
@@ -83,7 +83,7 @@ def alignFace(face, axisX, keypoints):
     if direction == -1:
         angleEyes = 90 - angleEyes
 
-    return np.array(Image.fromarray(face).rotate(direction * angleEyes))
+    return np.array(OpenCV.rotate(face, direction * angleEyes))
 
 
 def getAngleEyes(leftEye, rightEye, pointRightAngle):

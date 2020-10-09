@@ -130,5 +130,10 @@ dmypy.json
 
 .idea/
 
-data/database
-data/targets
+data/database/*.png
+data/database/*.jpg
+data/database/*.jpeg
+
+data/targets/*.png
+data/targets/*.jpg
+data/targets/*.jpeg

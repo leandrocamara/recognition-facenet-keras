@@ -1,4 +1,5 @@
 import cv2
+from PIL import Image
 
 colorFailure, colorSuccess = (255, 0, 0), (0, 255, 0)
 
@@ -23,3 +24,11 @@ def showRectangle(image, x, y, color=(255, 255, 255)):
 
 def showText(image, text, x, color=(255, 255, 255)):
     cv2.putText(image, text, x, cv2.FONT_HERSHEY_PLAIN, 1.5, color, 1)
+
+
+def rotate(image, angle):
+    return Image.fromarray(image).rotate(angle)
+
+
+def saveFile(url, image):
+    Image.fromarray(image).save(url)
